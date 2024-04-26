@@ -3,24 +3,24 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs/promises');
 
-// Define the destination folder for uploaded images
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, '../client/form-app/public/images');
   },
   filename: function (req, file, cb) {
-    // Define the filename for the uploaded image
+
+    
     cb(null, file.fieldname + '_' + Date.now() + path.extname(file.originalname));
   },
 });
 
-// Multer configuration using the storage options
+
 const upload = multer({ storage: storage });
 
 const createUser = async (req, res) => {
 
   try {
-    // Assuming req.body contains the form data
+    
     const name = req.body.name;
     const gender = req.body.gender;
     const skills = req.body.skills;
@@ -30,7 +30,7 @@ const createUser = async (req, res) => {
     const mobile = req.body.mobile;
     const terms = req.body.terms;
 
-    // Create a new instance of UserModel
+    
     const newUser = new UserModel({
       name: name,
       gender: gender,
@@ -42,7 +42,6 @@ const createUser = async (req, res) => {
     });
     console.log(newUser,"newUser");
 
-    // Save the user data to the database
     await newUser.save();
 
     res.json({ message: 'Form submitted successfully' });
@@ -67,7 +66,7 @@ const updateUser = async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    // Update the product
+    
     existingUser.name = name;
     existingUser.gender = gender;
     existingUser.skills = skills;
@@ -75,9 +74,9 @@ const updateUser = async (req, res) => {
     existingUser.mobile = mobile;
     existingUser.terms = terms;
 
-    // If there's a new image, update the image data in the database
+    
     if (photo) {
-      existingUser.photo = photo.filename; // Assuming Multer stores  the image
+      existingUser.photo = photo.filename; 
     }
 
     await existingUser.save();
@@ -95,23 +94,6 @@ const updateUser = async (req, res) => {
  
 
 
-// const getProduct=async (req,res)=>{
-  
-//   const user = await productModel.findOne({_id:req.params.id});
-//   console.log(req.params.id)
-//   if(user){
-//     res.json(user)
-//   } else{
-//     res.send({"result":"No Record found"})
-//   }
-  
-// }
-
-
-
-
-
-//print all the products which we add 
 const getAllUsers = async (req, res) => {
 try {
   const userlist = await UserModel.find();
@@ -129,10 +111,6 @@ const deleteUser = async (req,res) =>{
 let result= await UserModel.deleteOne({_id:req.params.id})
  res.send(result)
 }
-
-
-
-
 
 
 

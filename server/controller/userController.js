@@ -24,7 +24,7 @@ const createUser = async (req, res) => {
     const name = req.body.name;
     const gender = req.body.gender;
     const skills = req.body.skills;
-    const photo = req.file ? req.file.path : null;
+    const photo = req.file.filename 
     const dob = req.body.dob ? new Date(req.body.dob.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3')) : null;
 
     const mobile = req.body.mobile;
@@ -40,7 +40,7 @@ const createUser = async (req, res) => {
       mobile: mobile,
       terms: terms
     });
-    console.log(newUser,"newUser");
+    
 
     await newUser.save();
 
@@ -53,47 +53,69 @@ const createUser = async (req, res) => {
 
 
 
-
 const updateUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    const { name, gender, skills, dob,mobile, terms } = req.body;
+    const { name, gender, skills, dob, mobile, terms } = req.body;
     const photo = req.file;
 
     const existingUser = await UserModel.findById(userId);
 
     if (!existingUser) {
-      return res.status(404).json({ error: 'Product not found' });
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    
-    existingUser.name = name;
-    existingUser.gender = gender;
-    existingUser.skills = skills;
-    existingUser.dob = dob;
-    existingUser.mobile = mobile;
-    existingUser.terms = terms;
-
-    
-    if (photo) {
-      existingUser.photo = photo.filename; 
+    // Delete the old image if it exists
+    if (existingUser.photo) {
+      try {
+        await fs.unlink(`../client/form-app/public/images/${existingUser.photo}`);
+      } catch (error) {
+        console.error('Error deleting old image:', error);
+      }
     }
+
+    // Update only the fields that are provided in the request body
+    if (name) existingUser.name = name;
+    if (gender) existingUser.gender = gender;
+    if (skills) existingUser.skills = skills;
+    if (dob) existingUser.dob = dob;
+    if (mobile) existingUser.mobile = mobile;
+    if (terms) existingUser.terms = terms;
+    if (photo) existingUser.photo = photo.filename;
 
     await existingUser.save();
 
     res.status(200).json(existingUser);
   } catch (error) {
-    console.error('Error updating product:', error);
+    console.error('Error updating user:', error);
     res.status(500).send('Internal Server Error');
   }
 };
 
 
 
+const getUser = async (req, res) => {
+  try {
+    const user = await UserModel.findOne({ _id: req.params.id });
+    console.log(req.params.id);
 
- 
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).json({ error: "User not found" });
+    }
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 
+
+
+
+
+//print all the products which we add 
 const getAllUsers = async (req, res) => {
 try {
   const userlist = await UserModel.find();
@@ -115,4 +137,8 @@ let result= await UserModel.deleteOne({_id:req.params.id})
 
 
 
-module.exports = { createUser,getAllUsers,updateUser,deleteUser ,upload};
+
+
+
+
+module.exports = { createUser,getAllUsers,updateUser,deleteUser,getUser ,upload};

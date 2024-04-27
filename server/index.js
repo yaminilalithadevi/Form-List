@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const userRoutes = require('./routes/userRoute');
+const path = require("path"); // Add this line to import the path module
 
 const app = express();
 
@@ -10,8 +11,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(express.static(path.join(__dirname, '../client/form-app/public/images')));
+
 
 app.use('/users', userRoutes);
+
 
 
 const db = "mongodb://localhost:27017/Form-registrations";
